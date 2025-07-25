@@ -45,6 +45,7 @@ export default function Page() {
         if (landingPageData.metadata?.sections && landingPageData.metadata.sections.length > 0) {
           // Use sections from landing page metadata
           sectionsData = landingPageData.metadata.sections as Section[];
+          console.log('Using sections from landing page metadata:', sectionsData);
         } else {
           // Fallback: fetch sections separately
           try {
@@ -93,7 +94,7 @@ export default function Page() {
       <div className="h-screen w-full bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="text-white text-2xl font-light mb-4">Loading experience...</div>
-          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="spinner mx-auto"></div>
         </div>
       </div>
     );
@@ -104,12 +105,12 @@ export default function Page() {
       <div className="h-screen w-full bg-black flex items-center justify-center">
         <div className="text-center px-6 max-w-2xl">
           <div className="text-white text-2xl font-light mb-4">{error || 'Experience not found'}</div>
-          <div className="text-white/60 text-sm">
+          <div className="text-white/60 text-sm mb-6">
             Please ensure your Cosmic CMS bucket is properly configured with the required content types.
           </div>
           <button 
             onClick={() => window.location.reload()} 
-            className="mt-6 px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white hover:bg-white/20 transition-all duration-300"
+            className="px-6 py-2 glass rounded-full text-white hover:bg-white/20 transition-all duration-300"
           >
             Try Again
           </button>
@@ -133,6 +134,7 @@ export default function Page() {
             scrollToSection(1);
           }
         }}
+        hasNextSection={sections.length > 0}
       />
 
       {/* Content Sections */}

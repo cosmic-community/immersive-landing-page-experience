@@ -58,12 +58,37 @@ export const useScrollSections = (totalSections: number) => {
       }
     };
 
+    // Touch handling for mobile
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0]?.clientY || 0;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (!e.changedTouches[0]) return;
+      
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaY = touchStartY - touchEndY;
+      
+      if (Math.abs(deltaY) > 50) { // Minimum swipe distance
+        if (deltaY > 0) {
+          nextSection();
+        } else {
+          previousSection();
+        }
+      }
+    };
+
     document.addEventListener('wheel', handleWheel, { passive: false });
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
       document.removeEventListener('wheel', handleWheel);
       document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isScrolling, nextSection, previousSection]);
 

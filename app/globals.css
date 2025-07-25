@@ -1,112 +1,156 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
-    --border: 0 0% 80%;
-    --primary: 345 100% 47%;
-    --primary-foreground: 210 40% 98%;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
-  * {
-    @apply border-border;
-  }
-  
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    scroll-behavior: smooth;
-    overflow-x: hidden;
-  }
-
-  html {
-    scroll-snap-type: y mandatory;
-    overflow-x: hidden;
-  }
-
-  section {
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-  }
+:root {
+  --background-start: rgb(0, 0, 0);
+  --background-end: rgb(15, 15, 15);
+  --primary-text: rgb(255, 255, 255);
+  --secondary-text: rgba(255, 255, 255, 0.8);
+  --accent-color: rgba(255, 255, 255, 0.1);
 }
 
-@layer components {
-  .prose-invert {
-    @apply text-white;
-  }
-  
-  .prose-invert h1,
-  .prose-invert h2,
-  .prose-invert h3,
-  .prose-invert h4,
-  .prose-invert h5,
-  .prose-invert h6 {
-    @apply text-white;
-  }
-  
-  .prose-invert strong {
-    @apply text-white font-semibold;
-  }
-  
-  .prose-invert code {
-    @apply text-white bg-white/10 px-2 py-1 rounded;
-  }
-  
-  .prose-invert blockquote {
-    @apply text-white/90 border-white/30;
-  }
-  
-  .prose-invert ul > li::marker {
-    @apply text-white/60;
-  }
-  
-  .prose-invert ol > li::marker {
-    @apply text-white/60;
-  }
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
-/* Custom scrollbar for webkit browsers */
-::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
-}
-
-/* Smooth font rendering */
+html,
 body {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  max-width: 100vw;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
 }
 
-/* Glassmorphism effect utilities */
+body {
+  color: var(--primary-text);
+  background: linear-gradient(
+    to bottom,
+    var(--background-start),
+    var(--background-end)
+  );
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Disable default focus outlines and add custom ones */
+*:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Prose styles for markdown content */
+.prose {
+  color: var(--secondary-text);
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: var(--primary-text);
+  font-weight: 300;
+}
+
+.prose strong {
+  color: var(--primary-text);
+  font-weight: 500;
+}
+
+.prose a {
+  color: var(--primary-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+  transition: all 0.3s ease;
+}
+
+.prose a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.prose blockquote {
+  border-left-color: rgba(255, 255, 255, 0.3);
+  color: var(--primary-text);
+  font-style: italic;
+}
+
+.prose code {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary-text);
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+/* Animation utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Glass morphism effect */
 .glass {
-  @apply bg-white/10 backdrop-blur-sm border border-white/20;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.glass-dark {
-  @apply bg-black/10 backdrop-blur-sm border border-black/20;
+.glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* Custom animation for floating elements */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+/* Loading spinner */
+.spinner {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 2px solid rgba(255, 255, 255, 1);
+  width: 32px;
+  height: 32px;
+  animation: spin 1s linear infinite;
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Disable text selection on navigation elements */
-.no-select {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

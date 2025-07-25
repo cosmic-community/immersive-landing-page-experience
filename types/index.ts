@@ -1,3 +1,8 @@
+export interface CosmicImage {
+  url: string;
+  imgix_url: string;
+}
+
 export interface CosmicObject {
   id: string;
   title: string;
@@ -8,26 +13,31 @@ export interface CosmicObject {
   metadata: Record<string, any>;
 }
 
-export interface CosmicImage {
-  url: string;
-  imgix_url: string;
-}
-
-export interface LandingPage extends CosmicObject {
-  metadata: {
-    title: string;
-    subtitle?: string;
-    main_image?: CosmicImage;
-    sections?: Section[];
-  };
+export interface SectionMetadata {
+  title: string;
+  body?: string;
+  images?: CosmicImage[];
+  cta_button_label?: string;
+  cta_button_url?: string;
 }
 
 export interface Section extends CosmicObject {
-  metadata: {
-    title: string;
-    body?: string;
-    images?: CosmicImage[];
-    cta_button_label?: string;
-    cta_button_url?: string;
-  };
+  metadata: SectionMetadata;
+}
+
+export interface LandingPageMetadata {
+  title: string;
+  subtitle?: string;
+  main_image?: CosmicImage;
+  sections?: Section[];
+}
+
+export interface LandingPage extends CosmicObject {
+  metadata: LandingPageMetadata;
+}
+
+export interface CosmicResponse<T> {
+  object?: T;
+  objects?: T[];
+  total?: number;
 }
