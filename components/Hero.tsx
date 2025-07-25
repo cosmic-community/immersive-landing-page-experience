@@ -10,7 +10,9 @@ interface HeroProps {
 }
 
 export default function Hero({ landingPage, onScrollNext }: HeroProps) {
-  const { title, subtitle, main_image } = landingPage.metadata;
+  const title = landingPage.metadata?.title || landingPage.title || 'Welcome';
+  const subtitle = landingPage.metadata?.subtitle || '';
+  const main_image = landingPage.metadata?.main_image;
 
   return (
     <section 
@@ -24,12 +26,18 @@ export default function Hero({ landingPage, onScrollNext }: HeroProps) {
         animate={{ scale: 1 }}
         transition={{ duration: 2, ease: "easeOut" }}
       >
-        <img
-          src={`${main_image?.imgix_url}?w=2000&h=1200&fit=crop&auto=format,compress`}
-          alt={title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/50" />
+        {main_image?.imgix_url ? (
+          <>
+            <img
+              src={`${main_image.imgix_url}?w=2000&h=1200&fit=crop&auto=format,compress`}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/50" />
+          </>
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-900 via-black to-gray-800" />
+        )}
       </motion.div>
 
       {/* Content */}
@@ -43,14 +51,16 @@ export default function Hero({ landingPage, onScrollNext }: HeroProps) {
           {title}
         </motion.h1>
         
-        <motion.p
-          className="text-xl md:text-2xl lg:text-3xl text-white/80 font-light mb-12 max-w-4xl mx-auto leading-relaxed"
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.8 }}
-        >
-          {subtitle}
-        </motion.p>
+        {subtitle && (
+          <motion.p
+            className="text-xl md:text-2xl lg:text-3xl text-white/80 font-light mb-12 max-w-4xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.8 }}
+          >
+            {subtitle}
+          </motion.p>
+        )}
 
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}

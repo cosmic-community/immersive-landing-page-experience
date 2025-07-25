@@ -1,33 +1,33 @@
-export interface CosmicImage {
-  url: string;
-  imgix_url: string;
-}
-
-export interface SectionMetadata {
-  title: string;
-  body: string;
-  images: CosmicImage[];
-  cta_button_label?: string;
-  cta_button_url?: string;
-}
-
-export interface Section {
+export interface CosmicObject {
   id: string;
-  slug: string;
   title: string;
-  metadata: SectionMetadata;
+  slug: string;
+  status: string;
+  created_at: string;
+  modified_at: string;
+  metadata: Record<string, any>;
 }
 
-export interface LandingPageMetadata {
-  title: string;
-  subtitle: string;
-  main_image: CosmicImage;
-  sections: Section[];
+export interface LandingPage extends CosmicObject {
+  metadata: {
+    title: string;
+    subtitle?: string;
+    main_image?: {
+      imgix_url: string;
+      url: string;
+    };
+  };
 }
 
-export interface LandingPage {
-  id: string;
-  slug: string;
-  title: string;
-  metadata: LandingPageMetadata;
+export interface Section extends CosmicObject {
+  metadata: {
+    title: string;
+    body?: string;
+    images?: Array<{
+      imgix_url: string;
+      url: string;
+    }>;
+    cta_button_label?: string;
+    cta_button_url?: string;
+  };
 }

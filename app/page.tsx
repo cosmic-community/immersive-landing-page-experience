@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { cosmic } from '@/lib/cosmic';
+import { cosmicClient } from '@/lib/cosmic';
 import { useScrollSections } from '@/hooks/useScrollSections';
 import Hero from '@/components/Hero';
 import ScrollSection from '@/components/ScrollSection';
@@ -21,35 +21,59 @@ export default function Page() {
     async function fetchData() {
       try {
         setError(null);
+        setLoading(true);
+        
+        console.log('Starting data fetch...');
         
         // Fetch landing page data
-        const landingPageResponse = await cosmic.objects.findOne({
+        const landingPageResponse = await cosmicClient.objects.findOne({
           type: 'landing-page'
         }).props(['title', 'slug', 'metadata']).depth(1);
 
-        if (!landingPageResponse.object) {
-          setError('Landing page not found');
-          return;
+        console.log('Landing page response:', landingPageResponse);
+
+        if (!landingPageResponse || !landingPageResponse.object) {
+          throw new Error('Landing page not found. Please ensure you have created a landing page object in your Cosmic CMS bucket.');
         }
 
         setLandingPage(landingPageResponse.object as LandingPage);
 
         // Fetch sections data separately
         try {
-          const sectionsResponse = await cosmic.objects.find({
+          const sectionsResponse = await cosmicClient.objects.find({
             type: 'sections'
           }).props(['title', 'slug', 'metadata']).depth(1);
 
-          setSections(sectionsResponse.objects as Section[]);
-        } catch (sectionsError) {
+          console.log('Sections response:', sectionsResponse);
+          
+          if (sectionsResponse && sectionsResponse.objects) {
+            setSections(sectionsResponse.objects as Section[]);
+          } else {
+            setSections([]);
+          }
+        } catch (sectionsError: any) {
           // If sections don't exist, continue with empty array
-          console.log('No sections found, continuing with empty sections');
+          console.log('No sections found, continuing with empty sections:', sectionsError.message);
           setSections([]);
         }
 
-      } catch (error) {
-        console.error('Error fetching landing page:', error);
-        setError('Failed to load experience');
+      } catch (error: any) {
+        console.error('Error fetching data:', error);
+        
+        // Provide more specific error messages
+        let errorMessage = 'Failed to load experience';
+        
+        if (error.message?.includes('404')) {
+          errorMessage = 'Content not found. Please check your Cosmic CMS bucket configuration.';
+        } else if (error.message?.includes('401') || error.message?.includes('403')) {
+          errorMessage = 'Authentication failed. Please check your Cosmic CMS API keys.';
+        } else if (error.message?.includes('bucket')) {
+          errorMessage = 'Bucket not found. Please verify your COSMIC_BUCKET_SLUG environment variable.';
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -61,7 +85,10 @@ export default function Page() {
   if (loading) {
     return (
       <div className="h-screen w-full bg-black flex items-center justify-center">
-        <div className="text-white text-2xl font-light">Loading experience...</div>
+        <div className="text-center">
+          <div className="text-white text-2xl font-light mb-4">Loading experience...</div>
+          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
       </div>
     );
   }
@@ -69,14 +96,25 @@ export default function Page() {
   if (error || !landingPage) {
     return (
       <div className="h-screen w-full bg-black flex items-center justify-center">
-        <div className="text-white text-2xl font-light">{error || 'Experience not found'}</div>
+        <div className="text-center px-6 max-w-2xl">
+          <div className="text-white text-2xl font-light mb-4">{error || 'Experience not found'}</div>
+          <div className="text-white/60 text-sm">
+            Please ensure your Cosmic CMS bucket is properly configured with the required content types.
+          </div>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-6 px-6 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white hover:bg-white/20 transition-all duration-300"
+          >
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
 
   const sectionTitles = [
-    landingPage.metadata.title,
-    ...sections.map(section => section.metadata.title)
+    landingPage.metadata?.title || landingPage.title,
+    ...sections.map(section => section.metadata?.title || section.title)
   ];
 
   return (
