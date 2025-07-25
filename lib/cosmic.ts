@@ -15,12 +15,6 @@ export const cosmic = createBucketClient({
   writeKey: process.env.COSMIC_WRITE_KEY,
 })
 
-// Client-side read-only client for browser usage - using correct env vars
-export const cosmicClient = createBucketClient({
-  bucketSlug: process.env.COSMIC_BUCKET_SLUG!,
-  readKey: process.env.COSMIC_READ_KEY!,
-})
-
 // Type definitions based on your actual CMS structure
 export interface CosmicImage {
   url: string
@@ -34,7 +28,7 @@ export interface SectionData {
   metadata: {
     title: string
     body?: string
-    images: CosmicImage[]
+    images?: CosmicImage[]
     cta_button_label?: string
     cta_button_url?: string
   }
@@ -48,7 +42,7 @@ export interface LandingPageData {
     title: string
     subtitle?: string
     main_image?: CosmicImage
-    sections: SectionData[]
+    sections?: SectionData[]
   }
 }
 
