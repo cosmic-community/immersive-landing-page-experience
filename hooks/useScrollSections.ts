@@ -7,12 +7,25 @@ export const useScrollSections = (totalSections: number) => {
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastScrollTimeRef = useRef<number>(0);
+  const isScrollingRef = useRef<boolean>(false);
+  const currentSectionRef = useRef<number>(0);
+
+  // Keep refs in sync with state
+  useEffect(() => {
+    isScrollingRef.current = isScrolling;
+  }, [isScrolling]);
+
+  useEffect(() => {
+    currentSectionRef.current = currentSection;
+  }, [currentSection]);
 
   const scrollToSection = useCallback((sectionIndex: number) => {
-    if (isScrolling || sectionIndex < 0 || sectionIndex >= totalSections) return;
+    if (isScrollingRef.current || sectionIndex < 0 || sectionIndex >= totalSections) return;
     
     setIsScrolling(true);
+    isScrollingRef.current = true;
     setCurrentSection(sectionIndex);
+    currentSectionRef.current = sectionIndex;
     
     const element = document.getElementById(`section-${sectionIndex}`);
     if (element) {
@@ -30,20 +43,21 @@ export const useScrollSections = (totalSections: number) => {
     // Set scroll lock for longer duration to prevent rapid scrolling
     scrollTimeoutRef.current = setTimeout(() => {
       setIsScrolling(false);
+      isScrollingRef.current = false;
     }, 1200);
-  }, [isScrolling, totalSections]);
+  }, [totalSections]);
 
   const nextSection = useCallback(() => {
-    if (currentSection < totalSections - 1) {
-      scrollToSection(currentSection + 1);
+    if (currentSectionRef.current < totalSections - 1) {
+      scrollToSection(currentSectionRef.current + 1);
     }
-  }, [currentSection, totalSections, scrollToSection]);
+  }, [totalSections, scrollToSection]);
 
   const previousSection = useCallback(() => {
-    if (currentSection > 0) {
-      scrollToSection(currentSection - 1);
+    if (currentSectionRef.current > 0) {
+      scrollToSection(currentSectionRef.current - 1);
     }
-  }, [currentSection, scrollToSection]);
+  }, [scrollToSection]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -53,7 +67,7 @@ export const useScrollSections = (totalSections: number) => {
       const timeSinceLastScroll = now - lastScrollTimeRef.current;
       
       // Minimum time between scroll events (300ms)
-      if (isScrolling || timeSinceLastScroll < 300) return;
+      if (isScrollingRef.current || timeSinceLastScroll < 300) return;
       
       lastScrollTimeRef.current = now;
       
@@ -69,7 +83,7 @@ export const useScrollSections = (totalSections: number) => {
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isScrolling) return;
+      if (isScrollingRef.current) return;
       
       if (e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
@@ -90,7 +104,7 @@ export const useScrollSections = (totalSections: number) => {
     };
 
     const handleTouchEnd = (e: TouchEvent) => {
-      if (!e.changedTouches[0] || isScrolling) return;
+      if (!e.changedTouches[0] || isScrollingRef.current) return;
       
       const touchEndY = e.changedTouches[0].clientY;
       const touchEndTime = Date.now();
@@ -124,7 +138,7 @@ export const useScrollSections = (totalSections: number) => {
         clearTimeout(scrollTimeoutRef.current);
       }
     };
-  }, [isScrolling, nextSection, previousSection]);
+  }, [nextSection, previousSection]); // Removed isScrolling from dependencies
 
   // Cleanup timeout on unmount
   useEffect(() => {
