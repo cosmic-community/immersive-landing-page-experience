@@ -12,6 +12,7 @@ export default function Page() {
   const [landingPage, setLandingPage] = useState<LandingPage | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const totalSections = sections.length + 1; // +1 for hero section
   const { currentSection, scrollToSection } = useScrollSections(totalSections);
@@ -19,20 +20,36 @@ export default function Page() {
   useEffect(() => {
     async function fetchData() {
       try {
+        setError(null);
+        
         // Fetch landing page data
         const landingPageResponse = await cosmic.objects.findOne({
           type: 'landing-page'
         }).props(['title', 'slug', 'metadata']).depth(1);
 
-        // Fetch sections data
-        const sectionsResponse = await cosmic.objects.find({
-          type: 'sections'
-        }).props(['title', 'slug', 'metadata']);
+        if (!landingPageResponse.object) {
+          setError('Landing page not found');
+          return;
+        }
 
         setLandingPage(landingPageResponse.object as LandingPage);
-        setSections(sectionsResponse.objects as Section[]);
+
+        // Fetch sections data separately
+        try {
+          const sectionsResponse = await cosmic.objects.find({
+            type: 'sections'
+          }).props(['title', 'slug', 'metadata']).depth(1);
+
+          setSections(sectionsResponse.objects as Section[]);
+        } catch (sectionsError) {
+          // If sections don't exist, continue with empty array
+          console.log('No sections found, continuing with empty sections');
+          setSections([]);
+        }
+
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching landing page:', error);
+        setError('Failed to load experience');
       } finally {
         setLoading(false);
       }
@@ -49,10 +66,10 @@ export default function Page() {
     );
   }
 
-  if (!landingPage) {
+  if (error || !landingPage) {
     return (
       <div className="h-screen w-full bg-black flex items-center justify-center">
-        <div className="text-white text-2xl font-light">Experience not found</div>
+        <div className="text-white text-2xl font-light">{error || 'Experience not found'}</div>
       </div>
     );
   }
@@ -67,7 +84,11 @@ export default function Page() {
       {/* Hero Section */}
       <Hero 
         landingPage={landingPage}
-        onScrollNext={() => scrollToSection(1)}
+        onScrollNext={() => {
+          if (sections.length > 0) {
+            scrollToSection(1);
+          }
+        }}
       />
 
       {/* Content Sections */}
@@ -80,13 +101,15 @@ export default function Page() {
         />
       ))}
 
-      {/* Navigation */}
-      <Navigation
-        currentSection={currentSection}
-        totalSections={totalSections}
-        onSectionChange={scrollToSection}
-        sectionTitles={sectionTitles}
-      />
+      {/* Navigation - only show if there are sections */}
+      {sections.length > 0 && (
+        <Navigation
+          currentSection={currentSection}
+          totalSections={totalSections}
+          onSectionChange={scrollToSection}
+          sectionTitles={sectionTitles}
+        />
+      )}
     </main>
   );
 }
