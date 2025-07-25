@@ -15,13 +15,13 @@ export const cosmic = createBucketClient({
   writeKey: process.env.COSMIC_WRITE_KEY,
 })
 
-// Client-side read-only client for browser usage
+// Client-side read-only client for browser usage - using correct env vars
 export const cosmicClient = createBucketClient({
-  bucketSlug: process.env.NEXT_PUBLIC_COSMIC_BUCKET_SLUG || process.env.COSMIC_BUCKET_SLUG,
-  readKey: process.env.NEXT_PUBLIC_COSMIC_READ_KEY || process.env.COSMIC_READ_KEY,
+  bucketSlug: process.env.COSMIC_BUCKET_SLUG!,
+  readKey: process.env.COSMIC_READ_KEY!,
 })
 
-// Type definitions based on your CMS structure
+// Type definitions based on your actual CMS structure
 export interface CosmicImage {
   url: string
   imgix_url: string
@@ -57,12 +57,15 @@ export async function getLandingPage(): Promise<LandingPageData | null> {
   try {
     const response = await cosmic.objects.findOne({
       type: 'landing-page'
-    }).depth(1)
+    }).props(['id', 'title', 'slug', 'metadata']).depth(1)
     
     return response.object as LandingPageData
   } catch (error) {
     console.error('Error fetching landing page:', error)
-    return null
+    if ((error as any)?.status === 404) {
+      return null
+    }
+    throw error
   }
 }
 
@@ -70,11 +73,14 @@ export async function getSections(): Promise<SectionData[]> {
   try {
     const response = await cosmic.objects.find({
       type: 'sections'
-    }).depth(1)
+    }).props(['id', 'title', 'slug', 'metadata']).depth(1)
     
     return response.objects as SectionData[]
   } catch (error) {
     console.error('Error fetching sections:', error)
+    if ((error as any)?.status === 404) {
+      return []
+    }
     return []
   }
 }

@@ -53,40 +53,42 @@ export default function ScrollSection({ section, index, isActive }: ScrollSectio
           {title}
         </motion.h2>
         
-        <motion.div
-          className="prose prose-lg md:prose-xl lg:prose-2xl prose-invert max-w-none mb-12"
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ 
-            opacity: isActive ? 1 : 0.7, 
-            y: isActive ? 0 : 20 
-          }}
-          transition={{ duration: 1, delay: 0.5 }}
-        >
-          <ReactMarkdown 
-            className="text-white/90 font-light leading-relaxed"
-            components={{
-              h3: ({ children }) => (
-                <h3 className="text-2xl md:text-3xl font-light text-white mb-6">{children}</h3>
-              ),
-              p: ({ children }) => (
-                <p className="text-lg md:text-xl text-white/80 mb-4 leading-relaxed">{children}</p>
-              ),
-              ul: ({ children }) => (
-                <ul className="text-left space-y-3 text-white/80">{children}</ul>
-              ),
-              li: ({ children }) => (
-                <li className="text-lg md:text-xl">{children}</li>
-              ),
-              blockquote: ({ children }) => (
-                <blockquote className="border-l-4 border-white/30 pl-6 italic text-white/90 text-xl md:text-2xl">
-                  {children}
-                </blockquote>
-              )
+        {body && (
+          <motion.div
+            className="prose prose-lg md:prose-xl lg:prose-2xl prose-invert max-w-none mb-12"
+            initial={{ opacity: 0, y: 60 }}
+            animate={{ 
+              opacity: isActive ? 1 : 0.7, 
+              y: isActive ? 0 : 20 
             }}
+            transition={{ duration: 1, delay: 0.5 }}
           >
-            {body}
-          </ReactMarkdown>
-        </motion.div>
+            <ReactMarkdown 
+              className="text-white/90 font-light leading-relaxed"
+              components={{
+                h3: ({ children }) => (
+                  <h3 className="text-2xl md:text-3xl font-light text-white mb-6">{children}</h3>
+                ),
+                p: ({ children }) => (
+                  <p className="text-lg md:text-xl text-white/80 mb-4 leading-relaxed">{children}</p>
+                ),
+                ul: ({ children }) => (
+                  <ul className="text-left space-y-3 text-white/80">{children}</ul>
+                ),
+                li: ({ children }) => (
+                  <li className="text-lg md:text-xl">{children}</li>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-white/30 pl-6 italic text-white/90 text-xl md:text-2xl">
+                    {children}
+                  </blockquote>
+                )
+              }}
+            >
+              {body}
+            </ReactMarkdown>
+          </motion.div>
+        )}
 
         {cta_button_label && cta_button_url && (
           <motion.div

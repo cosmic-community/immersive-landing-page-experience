@@ -28,7 +28,7 @@ export default function Page() {
         // Fetch landing page data
         const landingPageResponse = await cosmicClient.objects.findOne({
           type: 'landing-page'
-        }).props(['title', 'slug', 'metadata']).depth(1);
+        }).props(['id', 'title', 'slug', 'metadata']).depth(1);
 
         console.log('Landing page response:', landingPageResponse);
 
@@ -36,31 +36,37 @@ export default function Page() {
           throw new Error('Landing page not found. Please ensure you have created a landing page object in your Cosmic CMS bucket.');
         }
 
-        setLandingPage(landingPageResponse.object as LandingPage);
+        const landingPageData = landingPageResponse.object as LandingPage;
+        setLandingPage(landingPageData);
 
-        // Fetch sections data separately
-        try {
-          const sectionsResponse = await cosmicClient.objects.find({
-            type: 'sections'
-          }).props(['title', 'slug', 'metadata']).depth(1);
+        // Get sections from landing page data first, then fetch individual sections
+        let sectionsData: Section[] = [];
+        
+        if (landingPageData.metadata?.sections && landingPageData.metadata.sections.length > 0) {
+          // Use sections from landing page metadata
+          sectionsData = landingPageData.metadata.sections as Section[];
+        } else {
+          // Fallback: fetch sections separately
+          try {
+            const sectionsResponse = await cosmicClient.objects.find({
+              type: 'sections'
+            }).props(['id', 'title', 'slug', 'metadata']).depth(1);
 
-          console.log('Sections response:', sectionsResponse);
-          
-          if (sectionsResponse && sectionsResponse.objects) {
-            setSections(sectionsResponse.objects as Section[]);
-          } else {
-            setSections([]);
+            console.log('Sections response:', sectionsResponse);
+            
+            if (sectionsResponse && sectionsResponse.objects) {
+              sectionsData = sectionsResponse.objects as Section[];
+            }
+          } catch (sectionsError: any) {
+            console.log('No sections found, continuing with empty sections:', sectionsError.message);
           }
-        } catch (sectionsError: any) {
-          // If sections don't exist, continue with empty array
-          console.log('No sections found, continuing with empty sections:', sectionsError.message);
-          setSections([]);
         }
+
+        setSections(sectionsData);
 
       } catch (error: any) {
         console.error('Error fetching data:', error);
         
-        // Provide more specific error messages
         let errorMessage = 'Failed to load experience';
         
         if (error.message?.includes('404')) {
