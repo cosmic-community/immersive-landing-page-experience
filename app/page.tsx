@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { cosmicClient } from '@/lib/cosmic';
+import { cosmic } from '@/lib/cosmic';
 import { useScrollSections } from '@/hooks/useScrollSections';
 import Hero from '@/components/Hero';
 import ScrollSection from '@/components/ScrollSection';
@@ -26,7 +26,7 @@ export default function Page() {
         console.log('Starting data fetch...');
         
         // Fetch landing page data
-        const landingPageResponse = await cosmicClient.objects.findOne({
+        const landingPageResponse = await cosmic.objects.findOne({
           type: 'landing-page'
         }).props(['id', 'title', 'slug', 'metadata']).depth(1);
 
@@ -48,7 +48,7 @@ export default function Page() {
         } else {
           // Fallback: fetch sections separately
           try {
-            const sectionsResponse = await cosmicClient.objects.find({
+            const sectionsResponse = await cosmic.objects.find({
               type: 'sections'
             }).props(['id', 'title', 'slug', 'metadata']).depth(1);
 
