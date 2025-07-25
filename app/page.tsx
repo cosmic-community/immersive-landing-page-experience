@@ -1,23 +1,92 @@
-import { cosmic } from '@/lib/cosmic'
-import Section from '@/components/Section'
+'use client';
 
-export default async function Page() {
-  const { objects: sections } = await cosmic.objects.find({
-    type: 'sections',
-  }).props(['title', 'slug', 'metadata'])
+import { useState, useEffect } from 'react';
+import { cosmic } from '@/lib/cosmic';
+import { useScrollSections } from '@/hooks/useScrollSections';
+import Hero from '@/components/Hero';
+import ScrollSection from '@/components/ScrollSection';
+import Navigation from '@/components/Navigation';
+import type { Section, LandingPage } from '@/types';
+
+export default function Page() {
+  const [landingPage, setLandingPage] = useState<LandingPage | null>(null);
+  const [sections, setSections] = useState<Section[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const totalSections = sections.length + 1; // +1 for hero section
+  const { currentSection, scrollToSection } = useScrollSections(totalSections);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Fetch landing page data
+        const landingPageResponse = await cosmic.objects.findOne({
+          type: 'landing-page'
+        }).props(['title', 'slug', 'metadata']).depth(1);
+
+        // Fetch sections data
+        const sectionsResponse = await cosmic.objects.find({
+          type: 'sections'
+        }).props(['title', 'slug', 'metadata']);
+
+        setLandingPage(landingPageResponse.object as LandingPage);
+        setSections(sectionsResponse.objects as Section[]);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-screen w-full bg-black flex items-center justify-center">
+        <div className="text-white text-2xl font-light">Loading experience...</div>
+      </div>
+    );
+  }
+
+  if (!landingPage) {
+    return (
+      <div className="h-screen w-full bg-black flex items-center justify-center">
+        <div className="text-white text-2xl font-light">Experience not found</div>
+      </div>
+    );
+  }
+
+  const sectionTitles = [
+    landingPage.metadata.title,
+    ...sections.map(section => section.metadata.title)
+  ];
 
   return (
-    <main>
-      {sections.map((section: any) => (
-        <Section
+    <main className="relative">
+      {/* Hero Section */}
+      <Hero 
+        landingPage={landingPage}
+        onScrollNext={() => scrollToSection(1)}
+      />
+
+      {/* Content Sections */}
+      {sections.map((section, index) => (
+        <ScrollSection
           key={section.id}
-          title={section.metadata.title}
-          body={section.metadata.body}
-          imageUrl={section.metadata.images[0]?.imgix_url}
-          ctaLabel={section.metadata.cta_button_label}
-          ctaUrl={section.metadata.cta_button_url}
+          section={section}
+          index={index}
+          isActive={currentSection === index + 1}
         />
       ))}
+
+      {/* Navigation */}
+      <Navigation
+        currentSection={currentSection}
+        totalSections={totalSections}
+        onSectionChange={scrollToSection}
+        sectionTitles={sectionTitles}
+      />
     </main>
-  )
+  );
 }

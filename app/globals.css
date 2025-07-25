@@ -10,4 +10,103 @@
     --primary: 345 100% 47%;
     --primary-foreground: 210 40% 98%;
   }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  html {
+    scroll-snap-type: y mandatory;
+    overflow-x: hidden;
+  }
+
+  section {
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+}
+
+@layer components {
+  .prose-invert {
+    @apply text-white;
+  }
+  
+  .prose-invert h1,
+  .prose-invert h2,
+  .prose-invert h3,
+  .prose-invert h4,
+  .prose-invert h5,
+  .prose-invert h6 {
+    @apply text-white;
+  }
+  
+  .prose-invert strong {
+    @apply text-white font-semibold;
+  }
+  
+  .prose-invert code {
+    @apply text-white bg-white/10 px-2 py-1 rounded;
+  }
+  
+  .prose-invert blockquote {
+    @apply text-white/90 border-white/30;
+  }
+  
+  .prose-invert ul > li::marker {
+    @apply text-white/60;
+  }
+  
+  .prose-invert ol > li::marker {
+    @apply text-white/60;
+  }
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Smooth font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism effect utilities */
+.glass {
+  @apply bg-white/10 backdrop-blur-sm border border-white/20;
+}
+
+.glass-dark {
+  @apply bg-black/10 backdrop-blur-sm border border-black/20;
+}
+
+/* Custom animation for floating elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Disable text selection on navigation elements */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
