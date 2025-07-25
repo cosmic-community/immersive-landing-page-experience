@@ -13,6 +13,7 @@ if (!process.env.COSMIC_READ_KEY) {
 export const cosmic = createBucketClient({
   bucketSlug: process.env.COSMIC_BUCKET_SLUG,
   readKey: process.env.COSMIC_READ_KEY,
+  apiEnvironment: "staging"
 })
 
 // Helper functions for fetching data
